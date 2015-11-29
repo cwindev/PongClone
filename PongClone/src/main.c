@@ -54,7 +54,7 @@ static void draw_scores();
 static void draw_paddles();
 static void draw_puck();
 static void reset_game();
-static void reset_puck();
+static void reset_puck(float velX);
 
 int *create_text_texture(SDL_Renderer *renderer, const char *s, TTF_Font *font, SDL_Color fgColor, struct sprite_s *sprite);
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 		draw();
 
 		// try and target 60fps
-		SDL_Delay(33);
+		//SDL_Delay(33);
 	}
 
 	unload_assets();
@@ -160,13 +160,15 @@ void update(float elapsedTime) {
 	if (game.puckPosX + PUCK_SIZE >= WINDOW_WIDTH) {
 		// ball touched right edge of screen, left scores
 		game.leftPaddle.score++;
-		reset_puck();
+		// reset the puck, but have it heading towards the right
+		reset_puck(abs(game.puckVelX) * 1.0f);
 	}
 
 	if (game.puckPosX <= 0) {
 		// ball touched left edge of screen, right scores
 		game.rightPaddle.score++;
-		reset_puck();
+		// reset the puck, but have it heading towards the left
+		reset_puck(abs(game.puckVelX) * -1.0f);
 	}
 
 	// TODO: consider changing this to avoid getting the puck stuck "zig-zagging"
@@ -312,16 +314,16 @@ static void reset_game() {
 	// TODO: Reset paddles to start positions (centre of screen)
 
 	game.leftPaddle.score = game.rightPaddle.score = 0;
-	reset_puck();
+	reset_puck(PUCK_SPEED);
 
 }
 
-static void reset_puck() {
+static void reset_puck(float velX) {
 	game.puckPosX = WINDOW_WIDTH / 2 - PUCK_SIZE / 2;
 	game.puckPosY = WINDOW_HEIGHT / 2 - PUCK_SIZE / 2;
 
 	// TODO: The initial direction of the puck should depend on who scored last
-	game.puckVelX = PUCK_SPEED;
+	game.puckVelX = velX;
 	game.puckVelY = PUCK_SPEED;
 
 }
